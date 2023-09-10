@@ -1,4 +1,3 @@
-import { readFile } from 'fs/promises';
 import { database } from './mongodb';
 
 export async function loadProducts() {
