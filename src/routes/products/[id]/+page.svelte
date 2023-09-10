@@ -6,17 +6,28 @@
   $: ({ product, relatedProducts, cart } = data);
 
   let recommendRequest = new Promise(() => {});
-  afterNavigate(() => {
-    recommendRequest = fetch(`/api/recommend?id=${product.id}`).then((res) => res.json())
-  })
+  let userRequest = new Promise(() => {});
 
+  afterNavigate(() => {
+    recommendRequest = fetch(`/api/recommend?id=${product.id}`).then((res) => res.json());
+    userRequest = fetch(`/api/self`).then((res) => res.json());
+  })
 </script>
 
 <header class="header">
   <a class="header-title" href="/">Svelte EC</a>
   <nav>
     <ul class="header-links">
-      <li>ようこそゲストさん</li>
+      <li>
+        ようこそ
+        {#await userRequest then user}
+          {#if user}
+            {user.email}さん <a href="/logout">ログアウト</a>
+          {:else}
+            ゲストさん <a href="/login">ログイン</a>  
+          {/if}
+        {/await}
+      </li>
       <li>
         <a href="/cart">カート ({cart.length})</a>
       </li>
@@ -37,10 +48,17 @@
         <dd>{product.price}</dd>
       </dl>
       <div>
-        {#if !cart.includes(product.id)}
+        {#if !cart.find((item) => item.id === product.id)}
           <form method="POST">
             <input type="hidden" name="productId" value={product.id} />
-            <button>カートに入れる</button>
+            {#await userRequest}
+              <button>カートに入れる</button>
+            {:then user}
+              <button disabled={!user}>カートに入れる</button> 
+              {#if !user}
+                <p>カートを使うには<a href="/login">ログイン</a>してください。</p>
+              {/if}
+            {/await}
           </form>
         {:else}
           <button disabled>カート追加済み</button>
