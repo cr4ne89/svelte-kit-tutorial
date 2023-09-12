@@ -1,7 +1,6 @@
-import { addToCart, loadCartItems } from '$lib/server/cart.js';
 import { loadProducts } from '$lib/server/product.js';
 
-export async function load({ locals, params }) {
+export async function load({ params }) {
   const products = await loadProducts();
   const productId = params.id;
   const product = await products.find((product) => productId === product.id);
